@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+/* Theme variables ------------------ */
+:root {
+  --appbg-start: #0f1724;
+  --appbg-end:   #0b1220;
+
+  --cardbg: #0b1220;
+  --muted:  #8e9aad;
+  --accent: #06b6d4;
+
+  --me-start: #083344;
+  --me-end:   #04566d;
+
+  --avatar-from: #0ea5a4;
+  --avatar-to:   #0284c7;
+}
+
+/* Theme-aware utilities (simple helpers) */
+.bg-app-gradient {
+  background: linear-gradient(to bottom, var(--appbg-start), var(--appbg-end));
+}
+
+.bg-cardbg {
+  background-color: var(--cardbg);
+}
+
+/* Slight translucent card (used as bg-cardbg/40 replacement) */
+.bg-cardbg-40 {
+  background-color: color-mix(in srgb, var(--cardbg), transparent 60%);
+}
+
+/* Muted text */
+.text-muted {
+  color: var(--muted);
+}
+
+/* Accent */
+.bg-accent {
+  background-color: var(--accent);
+}
+
+/* Message bubble gradient for \"me\" */
+.bg-me-gradient {
+  background: linear-gradient(to bottom, var(--me-start), var(--me-end));
+}
+
+/* Avatar gradient */
+.bg-avatar-gradient {
+  background: linear-gradient(135deg, var(--avatar-from), var(--avatar-to));
+}
+
+/* small white overlays used in original design */
+.bg-white-2 { background-color: rgba(255,255,255,0.02); }
+.bg-white-3 { background-color: rgba(255,255,255,0.03); }
+.bg-white-6 { background-color: rgba(255,255,255,0.06); }
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 1px; /* change width here */
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #e5e7eb; /* Tailwind gray-200 */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #9ca3af; /* gray-400 */
+  border-radius: 8px;
+}

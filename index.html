@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Local Chat Demo (Frontend + Dummy Data)</title>
+  <style>
+    :root{ --bg:#0f1724; --card:#0b1220; --muted:#94a3b8; --accent:#06b6d4; --me:#083344 }
+    *{box-sizing:border-box;font-family:Inter,ui-sans-serif,system-ui,Arial;}
+    body{margin:0;background:linear-gradient(180deg,#071224 0%, #0b1220 100%);color:#e6eef6;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+    .app{width:100%;max-width:1000px;height:640px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:12px;display:grid;grid-template-columns:320px 1fr;overflow:hidden;box-shadow:0 10px 30px rgba(2,6,23,0.6)}
+    .sidebar{padding:16px;background:rgba(255,255,255,0.02);border-right:1px solid rgba(255,255,255,0.03);display:flex;flex-direction:column;gap:12px}
+    .user-info{display:flex;align-items:center;gap:12px}
+    .avatar{width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,#0ea5a4,#0284c7);display:flex;align-items:center;justify-content:center;font-weight:700}
+    .name{font-weight:600}
+    .search{margin-top:8px}
+    .search input{width:100%;padding:8px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted)}
+    .chats{overflow:auto;flex:1;padding-right:6px}
+    .chat-item{display:flex;gap:10px;padding:10px;border-radius:8px;cursor:pointer;align-items:center}
+    .chat-item:hover{background:rgba(255,255,255,0.01)}
+    .chat-item.active{background:linear-gradient(90deg, rgba(6,182,212,0.12), rgba(6,182,212,0.04))}
+    .chat-meta{flex:1}
+    .chat-title{font-weight:600}
+    .chat-last{font-size:13px;color:var(--muted)}
+    .chat-window{display:flex;flex-direction:column;height:100%}
+    .chat-header{padding:16px;border-bottom:1px solid rgba(255,255,255,0.03);display:flex;align-items:center;gap:12px}
+    .chat-title-big{font-weight:700}
+    .messages{padding:16px;flex:1;overflow:auto;display:flex;flex-direction:column;gap:8px}
+    .msg{max-width:70%;padding:10px;border-radius:10px;background:rgba(255,255,255,0.02)}
+    .msg.me{margin-left:auto;background:linear-gradient(180deg,var(--me),#04566d);color:#dff6fb}
+    .msg .meta{font-size:12px;color:var(--muted);margin-bottom:6px}
+    .composer{padding:12px;border-top:1px solid rgba(255,255,255,0.03);display:flex;gap:8px;align-items:center}
+    .composer input{flex:1;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
+    .composer button{background:var(--accent);border:none;padding:10px 14px;border-radius:8px;color:#042226;font-weight:600;cursor:pointer}
+    .muted{color:var(--muted);font-size:13px}
+    .typing{font-size:12px;color:var(--muted);padding-left:6px}
+    @media (max-width:720px){.app{grid-template-columns:1fr;max-width:420px;height:720px}.sidebar{display:none}.chat-window{border-radius:12px}}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="sidebar">
+      <div class="user-info">
+        <div class="avatar" id="myAvatar">ME</div>
+        <div>
+          <div class="name" id="myName">You</div>
+          <div class="muted" id="myStatus">online</div>
+        </div>
+      </div>
+
+      <div class="search"><input id="search" placeholder="Search chats..." /></div>
+
+      <div class="chats" id="chatList"></div>
+    </div>
+
+    <div class="chat-window">
+      <div class="chat-header">
+        <div style="flex:1">
+          <div class="chat-title-big" id="chatTitle">Select a chat</div>
+          <div class="muted" id="chatMeta">...</div>
+        </div>
+        <div id="chatMembers" class="muted"></div>
+      </div>
+
+      <div class="messages" id="messages"></div>
+
+      <div class="typing" id="typing"></div>
+
+      <div class="composer">
+        <input id="messageInput" placeholder="Type a message" />
+        <button id="sendBtn">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dummy local data -->
+  <script>
+    // usersData.js
+    const users = [
+      { id: 'u1', name: 'Alice', avatar: 'A' },
+      { id: 'u2', name: 'Bob', avatar: 'B' },
+      { id: 'u3', name: 'Cara', avatar: 'C' },
+      { id: 'me', name: 'You', avatar: 'ME' }
+    ];
+
+    // chatsData.js
+    const chats = [
+      { id: 'c1', type: 'dm', title: 'Alice', members: ['me','u1'], lastMessageId: 'm2' },
+      { id: 'c2', type: 'dm', title: 'Bob', members: ['me','u2'], lastMessageId: 'm4' },
+      { id: 'c3', type: 'group', title: 'Dev Team', members: ['me','u1','u2','u3'], lastMessageId: 'm6' }
+    ];
+
+    // messagesData.js
+    const messages = [
+      { id: 'm1', chatId: 'c1', sender: 'u1', text: 'Hey! Are you free today?', ts: Date.now() - 1000*60*60, status: 'delivered' },
+      { id: 'm2', chatId: 'c1', sender: 'me', text: 'Yes, free after 5pm', ts: Date.now() - 1000*60*55, status: 'delivered' },
+
+      { id: 'm3', chatId: 'c2', sender: 'u2', text: 'Please review my PR.', ts: Date.now() - 1000*60*40, status: 'delivered' },
+      { id: 'm4', chatId: 'c2', sender: 'me', text: 'On it — will do in an hour.', ts: Date.now() - 1000*60*30, status: 'delivered' },
+
+      { id: 'm5', chatId: 'c3', sender: 'u3', text: 'Standup in 5', ts: Date.now() - 1000*60*10, status: 'delivered' },
+      { id: 'm6', chatId: 'c3', sender: 'u1', text: 'Noted', ts: Date.now() - 1000*60*8, status: 'delivered' }
+    ];
+  </script>
+
+  <!-- Frontend logic (non-realtime, local only) -->
+  <script>
+    const CURRENT_USER = 'me';
+
+    const chatListEl = document.getElementById('chatList');
+    const messagesEl = document.getElementById('messages');
+    const chatTitleEl = document.getElementById('chatTitle');
+    const chatMetaEl = document.getElementById('chatMeta');
+    const chatMembersEl = document.getElementById('chatMembers');
+    const sendBtn = document.getElementById('sendBtn');
+    const msgInput = document.getElementById('messageInput');
+    const typingEl = document.getElementById('typing');
+
+    let activeChatId = null;
+    let typingTimeout = null;
+
+    function byId(arr, id){ return arr.find(x=>x.id===id); }
+    function userName(id){ const u = byId(users, id); return u? u.name : id; }
+
+    function renderChatList(filter=''){
+      chatListEl.innerHTML = '';
+      chats.filter(c => c.title.toLowerCase().includes(filter.toLowerCase())).forEach(c => {
+        const lastMsg = messages.filter(m=>m.chatId===c.id).sort((a,b)=>a.ts-b.ts).slice(-1)[0];
+        const item = document.createElement('div');
+        item.className = 'chat-item' + (c.id===activeChatId? ' active':'');
+        item.innerHTML = `
+          <div class="avatar">${c.type==='group'? 'G' : (byId(users, c.members.find(m=>m!==CURRENT_USER))?.avatar || 'D')}</div>
+          <div class="chat-meta">
+            <div class="chat-title">${escapeHtml(c.title)}</div>
+            <div class="chat-last">${lastMsg? (escapeHtml(userName(lastMsg.sender))+': '+escapeHtml(lastMsg.text)) : 'No messages yet'}</div>
+          </div>
+        `;
+        item.onclick = ()=> openChat(c.id);
+        chatListEl.appendChild(item);
+      });
+    }
+
+    function renderMessages(chatId){
+      messagesEl.innerHTML = '';
+      const msgs = messages.filter(m=>m.chatId===chatId).sort((a,b)=>a.ts-b.ts);
+      for(const m of msgs){
+        const el = document.createElement('div');
+        el.className = 'msg ' + (m.sender===CURRENT_USER? 'me':'');
+        el.innerHTML = `<div class="meta">${escapeHtml(userName(m.sender))} · ${new Date(m.ts).toLocaleTimeString()}</div><div class="text">${escapeHtml(m.text)}</div>`;
+        messagesEl.appendChild(el);
+      }
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function openChat(chatId){
+      activeChatId = chatId;
+      const chat = byId(chats, chatId);
+      chatTitleEl.textContent = chat.title;
+      chatMetaEl.textContent = chat.type === 'group' ? (chat.members.length+' members') : 'Direct message';
+      chatMembersEl.textContent = chat.members.map(m=>userName(m)).join(', ');
+      renderChatList(document.getElementById('search').value);
+      renderMessages(chatId);
+    }
+
+    function sendMessage(){
+      const text = msgInput.value.trim();
+      if(!text || !activeChatId) return;
+      const tempId = 'tmp_' + Date.now();
+      const tempMsg = { id: tempId, chatId: activeChatId, sender: CURRENT_USER, text, ts: Date.now(), status: 'sending' };
+      messages.push(tempMsg);
+      renderMessages(activeChatId);
+      msgInput.value = '';
+
+      // simulate server persist (no real sockets)
+      setTimeout(()=>{
+        const realMsg = { id: 'm' + (messages.length+1) + '_' + Date.now(), chatId: activeChatId, sender: CURRENT_USER, text, ts: Date.now(), status: 'delivered' };
+        const idx = messages.findIndex(m=>m.id===tempId);
+        if(idx!==-1) messages.splice(idx,1,realMsg);
+        const chat = byId(chats, activeChatId);
+        if(chat) chat.lastMessageId = realMsg.id;
+        renderMessages(activeChatId);
+        renderChatList(document.getElementById('search').value);
+      }, 400);
+    }
+
+    // Typing indicator (local-only)
+    msgInput.addEventListener('input', ()=>{
+      typingEl.textContent = userName(CURRENT_USER) + ' is typing...';
+      clearTimeout(typingTimeout);
+      typingTimeout = setTimeout(()=> typingEl.textContent = '', 800);
+    });
+
+    sendBtn.onclick = sendMessage;
+    msgInput.onkeydown = (e) => { if(e.key === 'Enter') sendMessage(); };
+    document.getElementById('search').addEventListener('input', (e)=> renderChatList(e.target.value));
+
+    function escapeHtml(s){
+      return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    // init UI
+    (function init(){
+      renderChatList();
+      if(chats.length) openChat(chats[0].id);
+    })();
+  </script>
+</body>
+</html>
+

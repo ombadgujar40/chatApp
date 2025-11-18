@@ -1,0 +1,12 @@
+// server/routes/auth.routes.js
+const express = require('express');
+const router = express.Router();
+const authController = require('../controllers/auth.controller');
+const authMiddleware = require('../middlewares/auth.middleware');
+
+
+
+router.post('/login', authController.login); // create or login user and return token
+router.get('/me', authController.me); // optional: returns current user if token provided
+
+module.exports = router;
