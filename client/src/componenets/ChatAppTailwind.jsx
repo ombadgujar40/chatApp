@@ -4,11 +4,11 @@ import ChatListStatic from "./ChatList";
 import MessageListStatic from "./MessageList";
 import { useAuth } from "../context/authContext.jsx";
 import { useChat } from "../context/chatsContext.jsx";
-import axios from "axios";
+import api  from "../utils/axios";
 
 // 1. Import Socket Client
 import io from "socket.io-client";
-const ENDPOINT = "http://127.0.0.1:5000"; // Your Server URL
+const ENDPOINT = import.meta.env.VITE_API_URL; // Your Server URL
 var socket;
 
 
@@ -61,7 +61,7 @@ export default function ChatAppStatic() {
 
   const fetchUsers = async () => {
     try {
-      const resp = await axios.get("http://127.0.0.1:5000/api/chats", {
+      const resp = await api.get("/api/chats", {
         headers: {
           "Authorization": `Bearer ${token}`
         }
@@ -75,7 +75,7 @@ export default function ChatAppStatic() {
 
   const sendMessage = async () => {
     try {
-      const resp = await axios.post("http://127.0.0.1:5000/api/messages", {
+      const resp = await api.post("/api/messages", {
         chatId: selectedChat._id,
         text: text
       }, {

@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useAuth } from "../context/authContext"; // adjust path if needed
+import api from '../utils/axios';
 
 export default function Login({ onSuccess }) {
   const [mode, setMode] = useState('login'); // 'login' | 'register'
@@ -30,7 +31,7 @@ export default function Login({ onSuccess }) {
       const payload = { email: email.trim(), password };
       if (mode === 'register') payload.name = name.trim();
 
-      const resp = await axios.post('http://127.0.0.1:5000/api/auth/login', payload, {
+      const resp = await api.post('/api/auth/login', payload, {
         headers: { 'Content-Type': 'application/json' }
       });
 

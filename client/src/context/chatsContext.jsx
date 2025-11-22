@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from './authContext';
+import api from '../utils/axios';
 
 const ChatContext = createContext();
 
@@ -20,7 +21,7 @@ export const ChatProvider = ({ children }) => {
     }
     setLoadingChats(true);
     try {
-      const response = await axios.get('http://127.0.0.1:5000/api/chats', {
+      const response = await api.get('/api/chats', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -42,7 +43,7 @@ export const ChatProvider = ({ children }) => {
     }
     setLoadingMessages(true);
     try {
-      const response = await axios.get(`http://127.0.0.1:5000/api/messages/chat/${selectedChat}`, {
+      const response = await api.get(`/api/messages/chat/${selectedChat}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -60,8 +61,8 @@ export const ChatProvider = ({ children }) => {
   const sendMessage = async (chatId, content) => {
     if (!token || !chatId || !content) return;
     try {
-      const response = await axios.post(
-        `http://127.0.0.1:5000/api/messages/${chatId}`,
+      const response = await api.post(
+        `/api/messages/${chatId}`,
         { content },
         {
           headers: {

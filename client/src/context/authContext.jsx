@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect, useMemo } from 'react';
 import axios from 'axios';
+import api from '../utils/axios';
 
 // Create the context
 const AuthContext = createContext();
@@ -16,7 +17,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('token', token);
       // fetch user details if we have a token but no user object
       if (!user) {
-        axios.get('http://127.0.0.1:5000/api/auth/me')
+        api.get('/api/auth/me')
           .then(res => {
             if (res.data) {
               setUser(res.data.user);
