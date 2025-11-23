@@ -14,3 +14,10 @@ exports.getUser = asyncHandler(async (req, res) => {
   if (!user) return res.status(404).json({ ok: false, msg: 'User not found' });
   res.json({ ok: true, user });
 });
+
+exports.searchUsers = asyncHandler(async (req, res) => {
+  const { search } = req.query;
+  const users = await User.find({ email: search }).select('-password').lean();
+  res.status(200).json({ok: true, data: users });
+});
+

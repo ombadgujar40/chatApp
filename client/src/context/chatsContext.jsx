@@ -1,7 +1,7 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
-import axios from 'axios';
-import { useAuth } from './authContext';
-import api from '../utils/axios';
+import React, { createContext, useState, useContext, useEffect } from "react";
+import axios from "axios";
+import { useAuth } from "./authContext";
+import api from "../utils/axios";
 
 const ChatContext = createContext();
 
@@ -21,14 +21,14 @@ export const ChatProvider = ({ children }) => {
     }
     setLoadingChats(true);
     try {
-      const response = await api.get('/api/chats', {
+      const response = await api.get("/api/chats", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
       setChats(response.data);
     } catch (error) {
-      console.error('Error fetching chats:', error);
+      console.error("Error fetching chats:", error);
       setChats([]);
     } finally {
       setLoadingChats(false);
@@ -50,7 +50,7 @@ export const ChatProvider = ({ children }) => {
       });
       setMessages(response.data.messages);
     } catch (error) {
-      console.error('Error fetching messages:', error);
+      console.error("Error fetching messages:", error);
       setMessages([]);
     } finally {
       setLoadingMessages(false);
@@ -78,20 +78,38 @@ export const ChatProvider = ({ children }) => {
         )
       );
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error("Error sending message:", error);
     }
   };
 
   const setSelectedChatDetails = (selectedChat) => {
     if (selectedChat) {
-      setSelectedChat(selectedChat)
+      setSelectedChat(selectedChat);
     } else {
-      setSelectedChat({})
+      setSelectedChat({});
     }
-  }
+  };
 
-
-  
+  const fetchLastMessage = async (lastMessageId) => {
+    if (!token || !lastMessageId) {
+      setMessages([]);
+      return;
+    }
+    setLoadingMessages(true);
+    try {
+      const response = await api.get(`/api/chats/lastmsg/${lastMessageId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+      return null;
+    } finally {
+      setLoadingMessages(false);
+    }
+  };
 
   const value = {
     chats,
@@ -105,6 +123,7 @@ export const ChatProvider = ({ children }) => {
     setSelectedChat,
     setSelectedChatDetails,
     setMessages,
+    fetchLastMessage,
   };
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;
