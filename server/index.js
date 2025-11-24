@@ -1,16 +1,16 @@
 // server/index.js
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const connectDb = require('./db-dbconfig');
-const authRoutes = require('./routes/auth.routes');
-const usersRoutes = require('./routes/users.routes');
-const chatsRoutes = require('./routes/chats.routes');
-const messagesRoutes = require('./routes/messages.routes');
+require("dotenv").config();
+const express = require("express");
+const cors = require("cors");
+const connectDb = require("./db-dbconfig");
+const authRoutes = require("./routes/auth.routes");
+const usersRoutes = require("./routes/users.routes");
+const chatsRoutes = require("./routes/chats.routes");
+const messagesRoutes = require("./routes/messages.routes");
 
 // 1. Import HTTP and Socket.io
 const { Server } = require("socket.io");
-const http = require('http');
+const http = require("http");
 
 const app = express();
 const server = http.createServer(app);
@@ -29,19 +29,21 @@ app.use(express.json());
 const PORT = process.env.PORT || 5000;
 
 connectDb()
-  .then(() => console.log('Mongo connected'))
-  .catch(err => {
-    console.error('Mongo connection error:', err);
+  .then(() => console.log("Mongo connected"))
+  .catch((err) => {
+    console.error("Mongo connection error:", err);
     process.exit(1);
   });
 
 // API prefix
-app.use('/api/auth', authRoutes);
-app.use('/api/users', usersRoutes);
-app.use('/api/chats', chatsRoutes);
-app.use('/api/messages', messagesRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/users", usersRoutes);
+app.use("/api/chats", chatsRoutes);
+app.use("/api/messages", messagesRoutes);
 
-app.get('/', (req, res) => res.json({ ok: true, msg: 'Chat testing server running' }));
+app.get("/", (req, res) =>
+  res.json({ ok: true, msg: "Chat testing server running" })
+);
 
 //socket logic
 io.on("connection", (socket) => {
@@ -72,10 +74,7 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     console.log("USER DISCONNECTED");
   });
-
-
-})
-
+});
 
 // 5. Listen using 'server', not 'app'
 server.listen(PORT, () => {
